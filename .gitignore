@@ -8,6 +8,7 @@ __pycache__/
 # Distribution / packaging
 .Python
 env/
+ven/
 build/
 develop-eggs/
 dist/
@@ -15,7 +16,6 @@ downloads/
 eggs/
 lib/
 lib64/
-parts/
 sdist/
 var/
 *.egg-info/
@@ -52,3 +52,16 @@ docs/_build/
 
 # PyBuilder
 target/
+
+
+# OS X
+.DS_Store
+
+# collected static
+/money/static/
+
+# PyCharm files
+.idea/
+
+# SQLite
+*.sqlite3
