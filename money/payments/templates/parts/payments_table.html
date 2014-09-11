@@ -1,0 +1,26 @@
+{% load number_formatting %}
+
+<table class="table table-striped">
+    <tr>
+        <th>Где</th>
+        <th>Что</th>
+        <th>Сумма</th>
+        <th>Кто</th>
+        <th>Когда</th>
+    </tr>
+    {% for payment in payments %}
+        <tr>
+            <td>{{ payment.place }}</td>
+            <td>
+                <ul>
+                    {% for entry in payment.contents.names %}
+                        <li>{{ entry }}</li>
+                    {% endfor %}
+                </ul>
+            </td>
+            <td>{{ payment.amount | currency }}</td>
+            <td>{{ payment.user }}</td>
+            <td>{{ payment.date|date:"SHORT_DATETIME_FORMAT" }}</td>
+        </tr>
+    {% endfor %}
+</table>

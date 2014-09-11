@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block header %}
+    {{ block.super }}
+
+    <div class="starter-template">
+        <h1>Платежи</h1>
+        <p class="lead">История всех платежей c {{ from_date|date:"SHORT_DATE_FORMAT" }}</p>
+    </div>
+{% endblock %}
+
+{% block body %}
+    {% with payments=payments %}
+        {% include "parts/payments_table.html" %}
+    {% endwith %}
+{% endblock %}
+
