@@ -24,3 +24,15 @@ class Payment(models.Model):
     date = models.DateTimeField(verbose_name=u"Время", default=datetime.datetime.now)
     place = models.ForeignKey(Store, verbose_name=u"Место")
     contents = TaggableManager(through=TaggedContents)
+
+    payers = models.ManyToManyField(User, through='PaymentDealingQuota', related_name='payed_payments')
+
+
+class PaymentDealingQuota(models.Model):
+    """
+    Payment dealing quota class: describes amount of money that each user have to pay as a part of this payment
+    """
+
+    user = models.ForeignKey(User)
+    payment = models.ForeignKey(Payment)
+    amount = models.FloatField(verbose_name=u"Сумма")

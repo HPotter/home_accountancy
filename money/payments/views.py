@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
 from annoying.decorators import render_to
+from django.contrib.auth.models import User
 
 from models.payments import Payment
 from payments.models.stores import StoreType, Store
@@ -47,4 +48,11 @@ def my_payments(request):
         'payments': Payment.objects
             .filter(date__gte=from_date, user=request.user)
             .order_by('-date')
+    }
+
+@render_to('deal_payment.html')
+def deal_payment(request, payment_id):
+    return {
+        'payment': Payment.objects.get(id=payment_id),
+        'users': User.objects.all()
     }

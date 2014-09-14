@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% load static %}
+{% load number_formatting %}
+
+{% block js %}
+    {{ block.super }}
+
+    <script>
+        $(document).ready(function() {
+            $(".dealing_slider").slider({
+                orientation: "vertical",
+                range: "min",
+                min: 0,
+                max: 100,
+                value: 60,
+                slide: function( event, ui ) {
+                    $("#amount").val(ui.value);
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block css %}
+    {{ block.super }}
+
+    <style>
+        .dealing_slider {
+            width: 100%;
+            height: 200px;
+            border-radius: 0px;
+        }
+
+        .dealing_slider .ui-slider-handle {
+            display: none;
+        }
+
+        .dealing_slider .ui-slider-range {
+            border-radius: 0px;
+        }
+
+        .dealing_slider .ui-widget-header {
+            background: #d9edf7;
+        }
+
+        #dealing {
+            table-layout: fixed;
+        }
+
+        #dealing th, #dealing td {
+            border-top: none;
+        }
+    </style>
+{% endblock %}
+
+
+{% block header %}
+    {{ block.super }}
+
+    <div class="starter-template">
+        <h1>
+            {{ payment.amount | currency:"{0}&#8381;" }} в <a href="#">{{ payment.place }}</a>
+        </h1>
+        <p class="lead">
+            Заплатил {{ payment.user }} в {{ payment.date }}
+        </p>
+    </div>
+{% endblock %}
+
+
+{% block body %}
+    <table id="dealing" class="table">
+        <tr>
+            {% for user in users %}
+                <th>{{ user }}</th>
+            {% endfor %}
+        </tr>
+        <tr>
+            {% for user in users %}
+                <td>
+                    <div class="dealing_slider" data-user-id="{{ user.id }}"></div>
+                </td>
+            {% endfor %}
+        </tr>
+        <tr>
+            {% for user in users %}
+                <td>
+                    <p>
+                        <div class="input-group">
+                            <input type="text" class="form-control dealing_value" size="5">
+                            <span class="input-group-addon">&#8381;</span>
+                        </div>
+                    </p>
+
+                    <p>
+                        <div class="input-group">
+                            <input type="text" class="form-control dealing_percentage" size="3">
+                            <span class="input-group-addon">%</span>
+                        </div>
+                    </p>
+                </td>
+            {% endfor %}
+        </tr>
+    </table>
+{% endblock %}

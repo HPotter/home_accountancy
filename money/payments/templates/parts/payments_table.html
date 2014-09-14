@@ -7,6 +7,7 @@
         <th>Сумма</th>
         <th>Кто</th>
         <th>Когда</th>
+        <th>Распределение</th>
     </tr>
     {% for payment in payments %}
         <tr>
@@ -21,6 +22,15 @@
             <td>{{ payment.amount | currency }}</td>
             <td>{{ payment.user }}</td>
             <td>{{ payment.date|date:"SHORT_DATETIME_FORMAT" }}</td>
+            <td>
+                <a href="{% url "deal_payment" payment.id %}">
+                    {% if payment.payers.count %}
+                        <span class="glyphicon glyphicon-ok-sign success"></span>
+                    {% else %}
+                        <span class="glyphicon glyphicon-question-sign info"></span>
+                    {% endif %}
+                </a>
+            </td>
         </tr>
     {% endfor %}
 </table>
