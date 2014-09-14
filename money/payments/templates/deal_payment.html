@@ -5,17 +5,98 @@
 {% block js %}
     {{ block.super }}
 
+    <script src="{% static "js/jquery.fittext.js" %}"></script>
+
     <script>
+        var total = {{ payment.amount }};
+
+        var controls = [];
+
+        function abs_to_percents(abs_value) {
+            return abs_value * 100 / total;
+        }
+
+        function percents_to_abs(percent_value) {
+            return percent_value * total / 100;
+        }
+
+        function update(user_id, value) {
+            // fit value into [0..100]
+            value = Math.max(0, value);
+            value = Math.min(100, value);
+
+            // update all controls
+            controls[user_id].slider.slider('value', value);
+            controls[user_id].value.val(percents_to_abs(value));
+            controls[user_id].percentage.val(value);
+
+            // update equation
+            var slider_sum = 0;
+            $(".dealing_slider").each(function(index, value) {
+                slider_sum += percents_to_abs($(value).slider("option", "value"));
+            });
+            $("#slider_sum").text(slider_sum);
+            if(slider_sum == total) {
+                $("#correct_equation").show();
+                $("#incorrect_equation").hide();
+                $("#submit_button").prop('disabled', false);
+            } else {
+                $("#incorrect_equation").show();
+                $("#correct_equation").hide();
+                $("#submit_button").prop('disabled', true);
+            }
+        }
+
         $(document).ready(function() {
+            // BEGIN init controls array
+            $(".dealing_slider").each(function(index, value){
+                var user_id = $(this).data("userId");
+
+                controls[user_id] = {};
+
+                controls[user_id].slider = $(this);
+            });
+
+            $(".dealing_value").each(function(index, value){
+                var user_id = $(this).data("userId");
+
+                controls[user_id].value = $(this);
+            });
+
+            $(".dealing_percentage").each(function(index, value){
+                var user_id = $(this).data("userId");
+
+                controls[user_id].percentage = $(this);
+            });
+            // END init controls array
+
+            var initial_value = 100.0 / $(".dealing_slider").length;
+
             $(".dealing_slider").slider({
                 orientation: "vertical",
                 range: "min",
                 min: 0,
                 max: 100,
-                value: 60,
+                value: initial_value,
                 slide: function( event, ui ) {
-                    $("#amount").val(ui.value);
+                    update($(event.target).data("userId"), ui.value);
                 }
+            });
+
+            $(".dealing_value").change(function() {
+                var value = parseFloat($(this).val().replace(",", "."));
+
+                update($(this).data("userId"), abs_to_percents(value));
+            });
+
+            $(".dealing_percentage").change(function() {
+                var value = parseFloat($(this).val().replace(",", "."));
+
+                update($(this).data("userId"), value);
+            });
+
+            $(".dealing_slider").each(function() {
+                update($(this).data("userId"), initial_value);
             });
         });
     </script>
@@ -49,6 +130,16 @@
 
         #dealing th, #dealing td {
             border-top: none;
+        }
+
+        #correct_equation {
+            color: #3c763d;
+            margin-top: 10px;
+        }
+
+        #incorrect_equation {
+            color: #a94442;
+            margin-top: 10px;
         }
     </style>
 {% endblock %}
@@ -87,14 +178,14 @@
                 <td>
                     <p>
                         <div class="input-group">
-                            <input type="text" class="form-control dealing_value" size="5">
+                            <input type="text" class="form-control dealing_value" data-user-id="{{ user.id }}">
                             <span class="input-group-addon">&#8381;</span>
                         </div>
                     </p>
 
                     <p>
                         <div class="input-group">
-                            <input type="text" class="form-control dealing_percentage" size="3">
+                            <input type="text" class="form-control dealing_percentage" data-user-id="{{ user.id }}">
                             <span class="input-group-addon">%</span>
                         </div>
                     </p>
@@ -102,4 +193,18 @@
             {% endfor %}
         </tr>
     </table>
+
+    <div class="row">
+        <div class="col-md-4">
+            <button id="submit_button" type="button" class="btn btn-success btn-lg">Сохранить</button>
+        </div>
+        <div class="col-md-8">
+            <h2 id="correct_equation">
+                &Sigma; = {{ payment.amount }}
+            </h2>
+            <h2 id="incorrect_equation" style="display: none;">
+                &Sigma; = <span id="slider_sum">0</span> &ne; {{ payment.amount }}
+            </h2>
+        </div>
+    </div>
 {% endblock %}
