@@ -23,11 +23,15 @@
             <td>{{ payment.user }}</td>
             <td>{{ payment.date|date:"SHORT_DATETIME_FORMAT" }}</td>
             <td>
-                <a href="{% url "deal_payment" payment.id %}">
-                    {% if payment.payers.count %}
-                        <span class="glyphicon glyphicon-ok-sign success"></span>
+                <a href="{% url "deal_payment" payment.id %}"
+                    {% if payment.dealed %}
+                        style="color: green;"
+                    {% endif %}
+                >
+                    {% if payment.dealed %}
+                        <span class="glyphicon glyphicon-ok-sign"></span>
                     {% else %}
-                        <span class="glyphicon glyphicon-question-sign info"></span>
+                        <span class="glyphicon glyphicon-question-sign"></span>
                     {% endif %}
                 </a>
             </td>

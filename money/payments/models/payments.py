@@ -25,7 +25,12 @@ class Payment(models.Model):
     place = models.ForeignKey(Store, verbose_name=u"Место")
     contents = TaggableManager(through=TaggedContents)
 
-    payers = models.ManyToManyField(User, through='PaymentDealingQuota', related_name='payed_payments')
+    payers = models.ManyToManyField(User, through='PaymentDealingQuota',
+                                    related_name='payed_payments')
+
+    @property
+    def dealed(self):
+        return self.payers.exists()
 
 
 class PaymentDealingQuota(models.Model):

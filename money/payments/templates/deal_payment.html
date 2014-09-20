@@ -5,8 +5,6 @@
 {% block js %}
     {{ block.super }}
 
-    <script src="{% static "js/jquery.fittext.js" %}"></script>
-
     <script>
         var total = {{ payment.amount }};
 
@@ -70,14 +68,13 @@
             });
             // END init controls array
 
-            var initial_value = 100.0 / $(".dealing_slider").length;
 
             $(".dealing_slider").slider({
+                // TODO support mouse scroll on slider
                 orientation: "vertical",
                 range: "min",
                 min: 0,
                 max: 100,
-                value: initial_value,
                 slide: function( event, ui ) {
                     update($(event.target).data("userId"), ui.value);
                 }
@@ -95,9 +92,18 @@
                 update($(this).data("userId"), value);
             });
 
-            $(".dealing_slider").each(function() {
-                update($(this).data("userId"), initial_value);
-            });
+            // init values
+            {% if payment.dealed %}
+                {% for quota in payment.paymentdealingquota_set.all %}
+                    update({{ quota.user_id }}, abs_to_percents({{ quota.amount }}));
+                {% endfor %}
+            {% else %}
+                var initial_value = 100.0 / $(".dealing_slider").length;
+
+                $(".dealing_slider").each(function() {
+                    update($(this).data("userId"), initial_value);
+                });
+            {% endif %}
         });
     </script>
 {% endblock %}
@@ -160,51 +166,56 @@
 
 
 {% block body %}
-    <table id="dealing" class="table">
-        <tr>
-            {% for user in users %}
-                <th>{{ user }}</th>
-            {% endfor %}
-        </tr>
-        <tr>
-            {% for user in users %}
-                <td>
-                    <div class="dealing_slider" data-user-id="{{ user.id }}"></div>
-                </td>
-            {% endfor %}
-        </tr>
-        <tr>
-            {% for user in users %}
-                <td>
-                    <p>
-                        <div class="input-group">
-                            <input type="text" class="form-control dealing_value" data-user-id="{{ user.id }}">
-                            <span class="input-group-addon">&#8381;</span>
-                        </div>
-                    </p>
+    <form method="POST">
+        {% csrf_token %}
+        <table id="dealing" class="table">
+            <tr>
+                {% for user in users %}
+                    <th>{{ user }}</th>
+                {% endfor %}
+            </tr>
+            <tr>
+                {% for user in users %}
+                    <td>
+                        <div class="dealing_slider" data-user-id="{{ user.id }}"></div>
+                    </td>
+                {% endfor %}
+            </tr>
+            <tr>
+                {% for user in users %}
+                    <td>
+                        <input type="hidden" name="user_id[]" value="{{ user.id }}">
 
-                    <p>
-                        <div class="input-group">
-                            <input type="text" class="form-control dealing_percentage" data-user-id="{{ user.id }}">
-                            <span class="input-group-addon">%</span>
-                        </div>
-                    </p>
-                </td>
-            {% endfor %}
-        </tr>
-    </table>
+                        <p>
+                            <div class="input-group">
+                                <input type="text" name="amount[]" class="form-control dealing_value" data-user-id="{{ user.id }}">
+                                <span class="input-group-addon">&#8381;</span>
+                            </div>
+                        </p>
 
-    <div class="row">
-        <div class="col-md-4">
-            <button id="submit_button" type="button" class="btn btn-success btn-lg">Сохранить</button>
+                        <p>
+                            <div class="input-group">
+                                <input type="text" class="form-control dealing_percentage" data-user-id="{{ user.id }}">
+                                <span class="input-group-addon">%</span>
+                            </div>
+                        </p>
+                    </td>
+                {% endfor %}
+            </tr>
+        </table>
+
+        <div class="row">
+            <div class="col-md-4">
+                <button id="submit_button" type="submit" class="btn btn-success btn-lg">Сохранить</button>
+            </div>
+            <div class="col-md-8">
+                <h2 id="correct_equation">
+                    &Sigma; = {{ payment.amount }}
+                </h2>
+                <h2 id="incorrect_equation" style="display: none;">
+                    &Sigma; = <span id="slider_sum">0</span> &ne; {{ payment.amount }}
+                </h2>
+            </div>
         </div>
-        <div class="col-md-8">
-            <h2 id="correct_equation">
-                &Sigma; = {{ payment.amount }}
-            </h2>
-            <h2 id="incorrect_equation" style="display: none;">
-                &Sigma; = <span id="slider_sum">0</span> &ne; {{ payment.amount }}
-            </h2>
-        </div>
-    </div>
+    </form>
 {% endblock %}

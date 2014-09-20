@@ -1,10 +1,13 @@
+from itertools import izip
 from datetime import datetime, timedelta
 
 from annoying.decorators import render_to
 from django.contrib.auth.models import User
+from django.db import transaction
 
 from models.payments import Payment
 from payments.models.stores import StoreType, Store
+from payments.models import PaymentDealingQuota
 
 
 @render_to('payments.html')
@@ -20,7 +23,7 @@ def payments(request):
 
 @render_to('my_payments.html')
 def my_payments(request):
-    if request.method == "POST":
+    if request.method == 'POST':
         store_type, created = StoreType.objects.get_or_create(name=request.POST.get('store_type'))
 
         store, created = Store.objects.get_or_create(name=request.POST.get('store_name'), type=store_type)
@@ -52,7 +55,21 @@ def my_payments(request):
 
 @render_to('deal_payment.html')
 def deal_payment(request, payment_id):
+    payment = Payment.objects.get(id=payment_id)
+
+    if request.method == 'POST':
+        import pdb; pdb.set_trace()
+        with transaction.atomic():
+            for user_id, amount in izip(
+                    request.POST.getlist('user_id[]'),
+                    request.POST.getlist('amount[]')):
+                PaymentDealingQuota(
+                    user_id=user_id,
+                    payment=payment,
+                    amount=amount
+                ).save()
+
     return {
-        'payment': Payment.objects.get(id=payment_id),
+        'payment': payment,
         'users': User.objects.all()
     }
