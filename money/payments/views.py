@@ -58,7 +58,6 @@ def deal_payment(request, payment_id):
     payment = Payment.objects.get(id=payment_id)
 
     if request.method == 'POST':
-        import pdb; pdb.set_trace()
         with transaction.atomic():
             for user_id, amount in izip(
                     request.POST.getlist('user_id[]'),
