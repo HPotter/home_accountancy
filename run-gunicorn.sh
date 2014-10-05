@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 PROJECT_NAME="money"
 VERBOSE_NAME="home_accountancy"
